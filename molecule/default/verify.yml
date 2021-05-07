@@ -35,3 +35,37 @@
       msg: |
         Found warnings in output of `apt update`:
         {{ apt_update.stderr }}
+
+  - name: Create APP
+    dokku_app:
+      app: example-app
+
+  - name: Get list of apps  # noqa 301
+    command: dokku apps:list
+    register: dokku_apps
+
+  - name: Check that example_app is in list of apps
+    assert:
+      that:
+      - "'example-app' in dokku_apps.stdout"
+      msg: |
+        'example_app' not found in output of 'dokku apps:list':
+        {{ dokku_apps.stdout }}
+
+  - name: Set resource limits for a example_app
+    dokku_resource_limit:
+      resources:
+        cpu: 150
+      app: example-app
+
+  - name: Get lisf of a resources for a example_app
+    command: dokku resource:limit example-app
+    register: dokku_resource_limit
+
+  - name: Check that example-app have resource limits
+    assert:
+      that:
+      - "'cpu: 150' in dokku_resource_limit.stdout"
+      msg: |
+        Limits for a example app not found in output of 'dokku resource:limit example-app':
+        {{ dokku_resource_limit.stdout }}
